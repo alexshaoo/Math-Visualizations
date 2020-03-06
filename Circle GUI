@@ -1,0 +1,76 @@
+#https://py3.codeskulptor.org/#user305_L9IPwjJLz7_5.py
+
+import simplegui
+
+WIDTH = 1200
+HEIGHT = 600
+RADIUS = 200
+THICKNESS = 10
+CENTER = (WIDTH // 2, HEIGHT // 2)
+LINE_COL = "Red"
+CIRCLE_COL = "White"
+DOT_COL = "Blue"
+
+# Cyclic Quadrilaterals always have 4 vertices
+points = [[CENTER[0], CENTER[1] - RADIUS], [CENTER[0] + RADIUS, CENTER[1]], 
+          [CENTER[0], CENTER[1] + RADIUS], [CENTER[0] - RADIUS, CENTER[1]]]
+
+# Point that's selected
+point_selected = points[0]
+
+
+def draw_handler(canvas):
+    
+    # Draws outer circle
+    canvas.draw_circle((WIDTH / 2, HEIGHT / 2), RADIUS, THICKNESS, CIRCLE_COL)
+    
+    # Draws points
+    for point in points:
+        canvas.draw_circle(point, THICKNESS, 1, DOT_COL, DOT_COL)
+    
+    # Draws lines connecting points
+    for i in range(len(points)):
+        canvas.draw_line(points[i], points[(i + 1) % len(points)], 1, LINE_COL)
+    
+    # Highlight selected point by drawing over top with a yellow circle
+    canvas.draw_circle(point_selected, THICKNESS, 1, "Yellow", "Yellow")
+
+# Finds point clicked on
+def point_clicked_on(points, pos):
+    
+    # Checks every point
+    for point in points:
+        
+        # Returns point clicked on
+        if abs(point[0] - pos[0]) <= THICKNESS and abs(point[1] - pos[1]) <= THICKNESS:
+            return point
+
+# Return if the position clicked on is on the circumference of the circle
+def is_on_circumference(pos):
+    x = pos[0] - CENTER[0]
+    y = pos[1] - CENTER[1]
+    return abs(x ** 2 + y ** 2 - RADIUS ** 2) <= 100 * THICKNESS
+
+# Mouse drag handler
+def drag(pos):
+    global points, point_selected
+
+    # Finds point clicked on
+    point_clicked = point_clicked_on(points, pos)
+    
+    # Loops through each point
+    for index, point in enumerate(points):
+        
+        # Gets point and checks if point is on the circumference
+        if point_clicked == point and is_on_circumference(pos):
+            
+            # Moves new point to new location, sets it as selected point
+            points[index] = pos
+            point_selected = points[index]
+            break
+    
+
+diagram = simplegui.create_frame("Cyclic Quadrilaterals", WIDTH, HEIGHT)
+diagram.set_draw_handler(draw_handler)
+diagram.set_mousedrag_handler(drag)
+diagram.start()
